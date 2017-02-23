@@ -1,4 +1,6 @@
-class Parser(Parser):
+import tagger
+
+class Parser():
     """A transition-based dependency parser.
     
     This parser implements the arc-standard algorithm for dependency parsing.
@@ -22,14 +24,13 @@ class Parser(Parser):
         classifier: A multi-class perceptron classifier used to predict the
             next move of the parser.
     """
-    tagger = "tagger"
+    tagger = OurTagger();
     classifier ="classifier"
     
-    def __init__(self, tagger, classifier):
+    def __init__(self, tagger):
         self.tagger = tagger
-        self.classifier = classifier
         """Initialises a new parser."""
-        super().__init__()
+        #super().__init__()
     
     def parse(self, words):
         #return super().parse(words)

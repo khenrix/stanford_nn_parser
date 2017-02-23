@@ -1,4 +1,4 @@
-import tagger
+import classifier
 
 class Parser():
     """A transition-based dependency parser.
@@ -24,11 +24,11 @@ class Parser():
         classifier: A multi-class perceptron classifier used to predict the
             next move of the parser.
     """
-    tagger = OurTagger();
-    classifier ="classifier"
+    
     
     def __init__(self, tagger):
         self.tagger = tagger
+        self.classifier = classifier.Classifier()
         """Initialises a new parser."""
         #super().__init__()
     
@@ -54,7 +54,7 @@ class Parser():
             if not valid_moves:
                 break
             feature = self.features(words,tags,x,stack,pdt)
-            predicted_move = self.classifier.predict(feature,valid_moves)
+            predicted_move = self.classifier.predict(feature)
             x,stack,pdt =self.move(x,stack,pdt,predicted_move)
         
         return ((tags,pdt))
@@ -152,7 +152,6 @@ class Parser():
         return ((tags,pdt))      
      
     def gold_move(self, i, stack, pred_tree, gold_tree):
-        return super().gold_move(i,stack,pred_tree,gold_tree)
         """Returns the gold-standard move for the specified parser
         configuration.
         
@@ -199,7 +198,7 @@ class Parser():
                 if(valid):
                     return 2
             
-        if(i >=len(words)):
+        if(i >=len(pred_tree)):
             return 0
         else:
             return None
@@ -228,11 +227,9 @@ class Parser():
         else:
             feature = [(0,words[i]),(1,tags[i]),(2, stack[-1]), (3, tags[stack[-1]]), (4, stack[-2]), (5, tags[stack[-2]])]
    
-        #return super().features(words, tags, i, stack, parse)
         return feature
 
     def finalize(self):
         """Averages the weight vectors."""
-        #self.tagger.finalize()
-        #self.classifier.finalize()
-        super().finalize()
+        self.tagger.finalize()
+        self.classifier.finalize()

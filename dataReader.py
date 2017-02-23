@@ -48,9 +48,10 @@ def trees(fp):
         Head.append(0);
         
         for tokens in tree:
-            pos.append(tokens[1])
-            word.append(tokens[3])
-            Head.append(int(float(tokens[6])))
+            if len(tokens) != 0:
+                pos.append(tokens[1])
+                word.append(tokens[3])
+                Head.append(int(float(tokens[6])))
             
         bigList.append(pos);
         bigList.append(word);
@@ -60,35 +61,31 @@ def trees(fp):
 
 
 
-def evaluate():
+def evaluate(train_file, test_file, par):
         n_examples = 2000   # Set to None to train on all examples
 
-        par = parser.Parser()
-        with open("/home/johli160/TDDE09/TDDE09-P/en-ud-train.conllu") as fp:
+        #par = parser.Parser()
+        with open(train_file) as fp:
             empty = next(trees(fp))
-            print(empty)
             for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
                 par.update(words, gold_tags, gold_tree)
-              #  print("\rUpdated with sentence #{}".format(i), end="")
+                print("\rUpdated with sentence #{}".format(i))
                 if n_examples and i >= n_examples:
                     break
             print("")
-        parser.finalize()
+        par.finalize()
 
         acc_k = acc_n = 0
         uas_k = uas_n = 0
-        with open("/home/johli160/TDDE09/TDDE09-P/en-ud-dev.conllu") as fp:
+        with open(test_file) as fp:
             for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
                 pred_tags, pred_tree = par.parse(words)
                 acc_k += sum(int(g == p) for g, p in zip(gold_tags, pred_tags)) - 1
                 acc_n += len(words) - 1
                 uas_k += sum(int(g == p) for g, p in zip(gold_tree, pred_tree)) - 1
                 uas_n += len(words) - 1
-              #  print("\rParsing sentence #{}".format(i), end="")
+                print("\rParsing sentence #{}".format(i))
             print("")
-       # print("Tagging accuracy: {:.2%}".format(acc_k / acc_n))
-       # print("Unlabelled attachment score: {:.2%}".format(uas_k / uas_n))
+        print("Tagging accuracy: {:.2%}".format(acc_k / acc_n))
+        print("Unlabelled attachment score: {:.2%}".format(uas_k / uas_n))
 
-	
-if __name__ == "__main__":
-    main()

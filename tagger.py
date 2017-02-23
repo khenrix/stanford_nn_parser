@@ -1,26 +1,13 @@
-def init ():
-    # TODO: Implementera inläsningsmetod
-    training_data = nlp3.read_data("/home/TDDE09/labs/nlp3/suc-train.txt")
-    test_data = nlp3.read_data("/home/TDDE09/labs/nlp3/suc-test.txt")
-    suc_tags = set()
-    for tagged_sentence in training_data:
-        for word, tag in tagged_sentence:
-            suc_tags.add(tag)
-    suc_tags = sorted(suc_tags)
-    print(" ".join(suc_tags))
-    our_tagger = OurTagger(suc_tags)
-    our_tagger.train(training_data[:1000])
-    print(our_tagger.tag([word for word, tag in training_data[42]]))
-
-    #TODO: Implementera dessa två metoder
-    our_matrix = nlp3.confusion_matrix(our_tagger, test_data)
-    print("Accuracy: {:.2%}".format(nlp3.accuracy(our_matrix)))
-
-
-class OurTagger():
+class Tagger():
     def __init__(self, tags):
         """Creates a new tagger that uses the specified tag set."""
+        self.count = 0
         self.tags = tags
+        self.accumulator = {}
+        self.weights = {}
+        for tag in tags:
+            self.accumulator.setdefault(tag, {})
+            self.weights.setdefault(tag, {})
 
     def tag(self, words):
         """Tags the specified words, returning a tagged sentence."""
@@ -56,12 +43,11 @@ class OurTagger():
         """Trains this tagger on the specified gold-standard data."""
         self.weights = dict()
         self.accumulator = dict()
-        self.features_all = set()
         for tag in self.tags:
             self.weights[tag] = {}
             self.accumulator[tag] = {}
 
-        count = 1
+        self.count = 1
         for e in range(0, 1):
 
             for sentence in tagged_sentences:
@@ -77,7 +63,7 @@ class OurTagger():
 
                     features = self.get_features(words, k, pred_tags)
 
-                    p = self.predict( features)
+                    p = self.predict(features)
                     goldTag = sentence[i][1]
 
                     if p != goldTag:
@@ -85,18 +71,48 @@ class OurTagger():
                             self.weights[goldTag][feature] += 1
                             self.weights[p][feature] -= 1
 
-                            self.accumulator[p][feature] -= count
-                            self.accumulator[goldTag][feature] += count
+                            self.accumulator[p][feature] -= self.count
+                            self.accumulator[goldTag][feature] += self.count
 
                     i += 1
 
-                    count += 1
+                    self.count += 1
                     k += 1
                     pred_tags.append(p)
 
+        
+        # Averaging          
         for tag in self.tags:
             for word in self.weights[tag]:
-                self.weights[tag][word] -= self.accumulator[tag][word] / count
+                self.weights[tag][word] -= self.accumulator[tag][word] / self.count
+
+    def update(self, words, gold_tags):
+        pred_tags = list()
+        i = 0
+        k = 0
+        for word in words:
+            features = self.get_features(words, k, pred_tags)
+
+            p = self.predict( features)
+            goldTag = gold_tags[i]
+
+            if p != goldTag:
+                for feature in features:
+                    self.weights[goldTag][feature] += 1
+                    self.weights[p][feature] -= 1
+
+                    self.accumulator[p][feature] -= self.count
+                    self.accumulator[goldTag][feature] += self.count
+
+            i += 1
+
+            self.count += 1
+            k += 1
+            pred_tags.append(p)
+
+        return pred_tags
+
+
 
     def get_features(self, tokens, i, pred_tags):
         """Extracts the feature list for the specified configuration."""
@@ -126,3 +142,9 @@ class OurTagger():
             features.append((tokens[i + 1], tokens[i]))
 
         return features;
+
+
+    def finalize(self):
+        for tag in self.tags:
+            for word in self.weights[tag]:
+                self.weights[tag][word] -= self.accumulator[tag][word] / self.count

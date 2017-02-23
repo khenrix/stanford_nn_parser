@@ -40,9 +40,9 @@ class MyPerceptronClassifier():
                         mpc.accumilator[p][word]-=count
                         mpc.accumilator[y][word]+=count
                 count+=1
-        # Averaging
-        #for c in ['pos','neg']:
-         #   for word in mpc.weights[c]:
-          #      mpc.weights[c][word]-=mpc.accumilator[c][word]/count
+        #Averaging
+        for c in ['pos','neg']:
+            for word in mpc.weights[c]:
+                mpc.weights[c][word] -= mpc.accumilator[c][word]/count
 
         return mpc

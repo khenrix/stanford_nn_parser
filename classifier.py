@@ -1,16 +1,14 @@
-import nlp1
-
-training_data = nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.train.json")
-test_data = nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.test.json")
 
 
-class Classifier(object):
-
-    def predict(self, d):
-        return None
+training_data = None # nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.train.json")
+test_data = None #nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.test.json")
 
 
-class MyPerceptronClassifier(Classifier):
+class MyPerceptronClassifier():
+
+    def __init__(self):
+        """Initialises a new classifier."""
+        super(self).__init__()
 
     def predict(self, review):
         scores = {'pos': 0, 'neg': 0} # maps classes to scores
@@ -25,7 +23,7 @@ class MyPerceptronClassifier(Classifier):
 
 
     @classmethod
-    def train(cls, data, n_epochs=1):
+    def update(cls, data, n_epochs=1):
         mpc = cls()
         mpc.weights ={'pos':{}, 'neg' : {}}
         mpc.accumilator= {'pos':{}, 'neg':{}}

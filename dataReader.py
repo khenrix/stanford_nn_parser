@@ -4,22 +4,22 @@ import re
 import parser
 
 def main():
-	print("Start")
+        print("Start")
 #	with open("/home/johli160/TDDE09/TDDE09-P/en-ud-train.conllu") as fp:
-#		print(next(trees(fp)));
-#		print(next(trees(fp)));
-        #evaluate();
-        par = parser.Parser();
+#		print(next(trees(fp)))
+#		print(next(trees(fp)))
+        #evaluate()
+        par = parser.Parser()
 
 
 def conllu(fp):
-	returnList = list();
+        returnList = list()
 	while(True):	
-		tempLine = fp.next();
+		tempLine = fp.next()
 		if(tempLine[0] == "#"):
-			break;
-		wordList = tempLine.split( );
-		returnList.append(wordList);		
+			break
+		wordList = tempLine.split( )
+		returnList.append(wordList)		
 	if(len(returnList) > 1):	
 		del returnList[-1]
 	yield returnList
@@ -35,17 +35,17 @@ def trees(fp):
         tags is the list of corresponding tags, and heads is the list of
         head indices (one head index per word in the tree).
     """
-    tree =  conllu(fp);
+    tree =  conllu(fp)
     
     for tree in conllu(fp):
-        pos = list();
-        word = list();
-        Head = list();
-        bigList = list();
+        pos = list()
+        word = list()
+        Head = list()
+        bigList = list()
         
-        pos.append('<ROOT>');
-        word.append('<ROOT>');
-        Head.append(0);
+        pos.append('<ROOT>')
+        word.append('<ROOT>')
+        Head.append(0)
         
         for tokens in tree:
             if len(tokens) != 0:
@@ -53,11 +53,11 @@ def trees(fp):
                 word.append(tokens[3])
                 Head.append(int(float(tokens[6])))
             
-        bigList.append(pos);
-        bigList.append(word);
-        bigList.append(Head);
+        bigList.append(pos)
+        bigList.append(word)
+        bigList.append(Head)
     
-        yield bigList;
+        yield bigList
 
 
 

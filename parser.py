@@ -139,8 +139,8 @@ class Parser():
         pdt = [0]*len(words)
 
         tags = self.tagger.update(words,gold_tags)
-        print( "tags: ", tags)
-        print( "gold_tags: ", gold_tags)
+        #print( "tags: ", tags)
+        #print( "gold_tags: ", gold_tags)
         x=0
         while (True):
             g_move = self.gold_move(x,stack,pdt,gold_tree)

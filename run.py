@@ -13,6 +13,8 @@ def main():
     myTagger = tagger.Tagger(en_tags)
     myParser = parser.Parser(myTagger)
     dataReader.evaluate(en_train_file, en_test_file, myParser)
+    dataReader.evaluate(sv_train_file, sv_test_file, myParser)
+
 
 if __name__ == '__main__':
     main()

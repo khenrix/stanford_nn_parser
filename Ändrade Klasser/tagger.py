@@ -20,8 +20,8 @@ class Tagger():
             pred_tags.append(p)
             temp = (words[i],p)
             tagged_words.append(temp)
-        
-        return tagged_words
+
+        return [tag[1] for tag in tagged_words]
 
     def predict(self, features):
         scores = {}
@@ -57,7 +57,7 @@ class Tagger():
                         self.weights[y][feature] += 1
                         self.acc[y][feature] += self.count
         self.count += 1
-
+        return pred_tags
 
 
     def get_features(self, tokens, i, pred_tags):

@@ -61,18 +61,17 @@ def trees(fp):
 
 
 def evaluate(train_file, test_file, par):
-    n_examples = 100   # Set to None to train on all examples
+    n_examples = 1   # Set to None to train on all examples
 
     with open(train_file) as fp:
         for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
-            #print(words)
+            # print(words)
             par.update(words, gold_tags, gold_tree)
             print("\rUpdated with sentence #{}".format(i))
             if n_examples and i >= n_examples:
                 print("dataReader Break")
                 break
 
-        print("")
     par.finalize()
 
     acc_k = acc_n = 0
@@ -80,6 +79,8 @@ def evaluate(train_file, test_file, par):
     with open(test_file) as fp:
         for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
             pred_tags, pred_tree = par.parse(words)
+            #print pred_tags
+            #print gold_tags
             acc_k += sum(int(g == p) for g, p in zip(gold_tags, pred_tags)) - 1
             acc_n += len(words) - 1
             uas_k += sum(int(g == p) for g, p in zip(gold_tree, pred_tree)) - 1

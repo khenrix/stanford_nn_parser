@@ -14,12 +14,14 @@ class Classifier():
         self.count = 1
 
     def predict(self, feature,candidates=None):
+        if candidates == None:
+            candidates = self.weights.keys()
         scores = {} # maps classes to scores
         occur = {}
         for f in feature:
             occur[f] = occur.setdefault(f, 0) + 1
 
-        for c in self.weights.keys():
+        for c in candidates:
             for f in occur:
                 scores[c] = scores.setdefault(c, 0.0) + self.weights[c].setdefault(f, 0.0) * occur[f]
                 self.accumilator[c].setdefault(f, 0.0)
@@ -45,7 +47,7 @@ class Classifier():
         return p
 
     def finalize(self):
-        #Averaging
+        # Averaging
         for c in self.accumilator.keys():
             for f in self.accumilator[c]:
                 self.weights[c][f] = self.weights[c].setdefault(f, 0.0) - self.accumilator[c].setdefault(f, 0.0) / self.count

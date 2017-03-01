@@ -1,1 +1,0 @@
-([word1,word2,word3,word4],[tag1,tag2,tag3,tag4],[0,3,2,0]]

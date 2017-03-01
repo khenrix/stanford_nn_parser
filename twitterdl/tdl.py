@@ -284,7 +284,7 @@ def get_data(kid, max_id=None):
 
 
 
-    except Exception, e:
+    except Exception e:
 
         print "Error reading id %s, exception: %s" % (kid, e)
 

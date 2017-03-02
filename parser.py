@@ -51,7 +51,8 @@ class Parser():
             if not valid_moves:
                 break
             feature = self.features(words,tags,x,stack,pdt)
-            predicted_move = self.classifier.predict(feature, valid_moves)[0]
+            #print(self.classifier.predict(feature, valid_moves)[1])
+            predicted_move = self.classifier.predict(feature, valid_moves)[1]
             x,stack,pdt = self.move(x,stack,pdt,predicted_move)
 
         return tags, pdt

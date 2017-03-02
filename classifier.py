@@ -9,12 +9,18 @@ class Classifier():
         self.accumilator = {}
         self.count = 1
         self.nn = None
+        
+        for move_class in [0,1,2]: 
+            self.weights.update({move_class:{}})
+            self.accumilator.update({move_class:{}})   
 
     def predict(self, feature,candidates=None):
-        if candidates == None:
-            candidates = self.weights.keys()
+        if candidates is None:
+            candidates = [0,1,2]
+        
         scores = {} # maps classes to scores
         occur = {}
+        
         for f in feature:
             occur[f] = occur.setdefault(f, 0) + 1
 
@@ -26,17 +32,15 @@ class Classifier():
         if self.nn is None:
             self.nn = nn.NN(scores)
             
-        output = self.nn.predict(scores)
+        output = self.nn.predict(scores,candidates)
         return (max(scores, key=lambda c: (scores[c], c)),output)
 
     def update(self, feature, gold):
         if gold not in self.classes:
             self.classes.append(gold)
-            self.weights[gold] = {}
-            self.accumilator[gold] = {}
 
         p = self.predict(feature)
-        #self.nn.update(feature, p[1], gold)
+        self.nn.update(p[1], gold)
         
         if p[0] != gold:
             for word in feature:

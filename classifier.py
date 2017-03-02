@@ -1,8 +1,4 @@
-#from bokeh.resources import EMPTY
-
-training_data = None # nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.train.json")
-test_data = None # nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.Parser.json")
-
+import nn
 
 class Classifier():
 
@@ -12,6 +8,7 @@ class Classifier():
         self.weights = {}
         self.accumilator = {}
         self.count = 1
+        self.nn = None
 
     def predict(self, feature,candidates=None):
         if candidates == None:
@@ -25,7 +22,12 @@ class Classifier():
             for f in occur:
                 scores[c] = scores.setdefault(c, 0.0) + self.weights[c].setdefault(f, 0.0) * occur[f]
                 self.accumilator[c].setdefault(f, 0.0)
-        return max(scores, key=lambda c: (scores[c], c))
+                
+        if self.nn is None:
+            self.nn = nn.NN(scores)
+            
+        output = self.nn.predict(scores)
+        return (max(scores, key=lambda c: (scores[c], c)),output)
 
     def update(self, feature, gold):
         if gold not in self.classes:
@@ -34,11 +36,12 @@ class Classifier():
             self.accumilator[gold] = {}
 
         p = self.predict(feature)
-
-        if p!=gold:
+        #self.nn.update(feature, p[1], gold)
+        
+        if p[0] != gold:
             for word in feature:
-                self.weights[p][word] -= 1
-                self.accumilator[p][word] -=self.count
+                self.weights[p[0]][word] -= 1
+                self.accumilator[p[0]][word] -=self.count
 
                 self.weights[gold][word] += 1
                 self.accumilator[gold][word] +=self.count

@@ -29,11 +29,9 @@ class Parser():
         self.tagger = tagger
         self.classifier = classifier.Classifier()
         """Initialises a new parser."""
-        # super().__init__()
 
 
     def parse(self, words):
-        # return super().parse(words)
         """Parses a sentence.
         Args:
             words: The input sentence, a list of words.
@@ -42,7 +40,6 @@ class Parser():
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
         """
-        buffer = words
         stack = []
         pdt = [0]*len(words)
 
@@ -54,14 +51,13 @@ class Parser():
             if not valid_moves:
                 break
             feature = self.features(words,tags,x,stack,pdt)
-            predicted_move = self.classifier.predict(feature, valid_moves)
+            predicted_move = self.classifier.predict(feature, valid_moves)[0]
             x,stack,pdt = self.move(x,stack,pdt,predicted_move)
 
         return tags, pdt
 
 
     def valid_moves(self, i, stack, pred_tree):
-        # return super().valid_moves(i, stack, pred_tree)
         """Returns the valid moves for the specified parser configuration.*
         
         Args:
@@ -73,22 +69,17 @@ class Parser():
             The list of valid moves for the specified parser configuration.
         """
         valid_moves = []
-        # There are elements left in the buffer.
         if(i < len(pred_tree)):
             valid_moves.append(0)
-        # There are more than two elements + root element in the stack
+            
         if(len(stack)>=2):
             valid_moves.append(1)
-            valid_moves.append(2)
-        # There are only 1 element + the root element in the stack
-        elif(len(stack)==2):
             valid_moves.append(2)
 
         return valid_moves
 
 
     def move(self, i, stack, pred_tree, move):
-        # return super().move(i, stack, pred_tree, move)
         """Executes a single move.
         
         Args:
@@ -122,7 +113,6 @@ class Parser():
 
 
     def update(self, words, gold_tags, gold_tree):
-        # return super().update(words, gold_tags, gold_tree)
         """Updates the move classifier with a single training example.
         
         Args:
@@ -134,7 +124,6 @@ class Parser():
             A pair consisting of the predicted tags and the predicted
             dependency tree for the input sentence.
         """
-        buffer = words
         stack = []
         pdt = [0]*len(words)
 
@@ -219,30 +208,8 @@ class Parser():
         
         Returns:
             A feature vector for the specified configuration.
-
-        # empty stack
-        if(len(stack)==0):
-            print '1'
-            feature = [(0,words[i]),(1,tags[i]),(2, '<EMPTY>'), (3, '<EMPTY>'), (4, '<EMPTY>'), (5, '<EMPTY>')]
-        # 1 item on stack
-        elif(len(stack) == 1):
-            if(len(words) > i):
-                print '2'
-                feature = [(0,words[i]),(1,tags[i]),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, '<EMPTY>'), (5, '<EMPTY>')]
-            else:
-                print '3'
-                feature = [(0, '<EMPTY>'), (1, '<EMPTY>'), (2, words[stack[-1]]), (3, tags[stack[-1]]), (4, '<EMPTY>'), (5, '<EMPTY>')]
-        # empty buffer
-        elif(len(words) <=i or len(words)==0 and len(stack)>2):
-            print '4'
-            feature = [(0, '<EMPTY>'),(1, '<EMPTY>'),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, words[stack[-2]]), (5, tags[stack[-2]])]
-
-        else:
-            print '5'
-            feature = [(0,words[i]),(1,tags[i]),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, words[stack[-2]]), (5, tags[stack[-2]])]
-
-        return feature
         """
+        
         features = list()
         if(i<len(words)):
             features.append((0,words[i]))

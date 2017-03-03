@@ -1,49 +1,89 @@
 import numpy as np
+import tagger
+
 import random as rnd
 
 # This class contains the Neural Network replacing the perceptron for the classifier.
 
 class NN():
-    hidden_amount = 3
-    hidden_weights = {}
-    hidden_features = {}
 
-    def __init__(self, activation):
-        temp = {x:rnd.randint(-1,1) for x in activation} #{0:rnd, 1:rnd, 2:rnd}
-        self.hidden_weights = {y:0 for y in activation} #{0:{0:rnd, 1:rnd, 2:rnd}, 1:{0:rnd, 1:rnd, 2:rnd}, 2: {0:rnd, 1:rnd, 2:rnd}}
-        print(self.hidden_weights)
-        self.hidden_features = {z:0 for z in activation} #{0:0, 1:0, 2:0}
+    weights_word = {}
+    weights_tags = {}
+    weights_label = {}
+    tagger = None
 
-    def hidden_function(self,activation):
-        return np.tanh(activation)
+    def __init__(self, tagger):
+        self.tagger = tagger
 
-    def predict(self, activation,candidates):
-        output = {}
-        for c in candidates:
-            for feature in self.hidden_features:
-                self.hidden_features[feature] = self.hidden_function(feature)+1
-                #print(self.hidden_weights[c].setdefault(feature,0.0))
-                #print(feature)
-                output[c] = output.setdefault(c, 0.0)+ self.hidden_weights[c].setdefault(feature,0.0)* self.hidden_features[feature]
-                #print(output)
-        
-        if(max(output, key = lambda c: (output[c], c)) in candidates):
-            #print(output)
-            #print(max(output, key = lambda c: (output[c], c)))
-            return max(output, key = lambda c: (output[c], c))
+    def hidden_function(self, w, t, l, bias=1, func='cube'):
+        # Get feature representation of elements
+        word = self.embedd(w,'w')
+        tag = self.embedd(t,'t')
+        label = self.embedd(l,'l')
+
+        # Calcaulate hidden layer
+        data = word*self.weights_word[w] + tag+self.weights_tags[t] + label*self.weights_label[l] + bias
+
+        return self.activation_function(data,func)
+
+    def activation_function(self, data, func):
+        if func == 'cube':
+            return data^3
+        elif func == 'tanh':
+            return np.tanh(data)
+        elif func == 'sigmoid':
+            return 1 / (1 + np.exp(-data))
+        elif func == 'identity':
+            return data
+
+    def embedd(self, element, type):
+        # Represent element as a d-dimensional vector
+        # TODO: What is the format ? What is the embedding?
+        feature = 0
+
+        if type == 'w':
+            # Transform Word
+            feature = 0
+        elif type == 't':
+            # Transform Tag
+            feature = 0
+        elif type == 'l':
+            # Transform Arc-Label
+            feature = 0
+
+        return feature
+
+    def create_sets(self, buffer, stack):
+        Sw, St, Sl = [], [], [0 for elem in buffer]
+
+        # Get the top 3 words on stack, if less then 3 exist, add Null instead
+        if len(stack) < 3:
+            Sw = stack
+            St = self.tagger.tag(Sw)
+            while len(Sw) < 3:
+                Sw.append('NULL')
+                St.append('NULL')
         else:
-            return 0
-        
-    
-    def update(self,p,gold):
-        #print(self.hidden_weights)
-        if p != gold:
-            for feature in [0,1,2]:
-                #print(feature)
-                #print(self.hidden_weights[p][word])
-                #print(feature)
-                self.hidden_weights[p][feature] -= 1
+            Sw = stack[:-4:-1] # "Pop" 3 elements from stack
+            St = self.tagger.tag(Sw)
 
-                self.hidden_weights[gold][feature] += 1
+        # Get the top 3 words on the buffer
+        if len(buffer) < 3:
+            Sw.extend(buffer)
+            St.extend(self.tagger.tag(Sw))
+            while len(Sw) < 6:
+                Sw.append('NULL')
+                St.append('NULL')
+        else:
+            Sw.extend(buffer[0:2])
+            St.extend(self.tagger.tag(Sw[3:6]))
 
-        return p
+        return Sw, St, Sl
+
+
+    def predict(self, buffer, stack):
+
+        Sw, St, Sl = self.create_sets()
+        h = self.hidden_function()
+
+    def update(self, buffer, stack):

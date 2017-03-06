@@ -1,4 +1,8 @@
-# import nn
+#from bokeh.resources import EMPTY
+
+training_data = None # nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.train.json")
+test_data = None # nlp1.load_data("/home/TDDE09/labs/nlp1/review_polarity.Parser.json")
+
 
 class Classifier():
 
@@ -8,19 +12,12 @@ class Classifier():
         self.weights = {}
         self.accumilator = {}
         self.count = 1
-        self.nn = None
-        
-        for move_class in [0,1,2]: 
-            self.weights.update({move_class:{}})
-            self.accumilator.update({move_class:{}})   
 
     def predict(self, feature,candidates=None):
-        if candidates is None:
-            candidates = [0,1,2]
-        
+        if candidates == None:
+            candidates = self.weights.keys()
         scores = {} # maps classes to scores
         occur = {}
-        
         for f in feature:
             occur[f] = occur.setdefault(f, 0) + 1
 
@@ -28,24 +25,20 @@ class Classifier():
             for f in occur:
                 scores[c] = scores.setdefault(c, 0.0) + self.weights[c].setdefault(f, 0.0) * occur[f]
                 self.accumilator[c].setdefault(f, 0.0)
-                
-        if self.nn is None:
-            self.nn = nn.NN(scores)
-            
-        output = self.nn.predict(scores,candidates)
-        return (max(scores, key=lambda c: (scores[c], c)),output)
+        return max(scores, key=lambda c: (scores[c], c))
 
     def update(self, feature, gold):
         if gold not in self.classes:
             self.classes.append(gold)
+            self.weights[gold] = {}
+            self.accumilator[gold] = {}
 
         p = self.predict(feature)
-        self.nn.update(p[1], gold)
-        
-        if p[0] != gold:
+
+        if p!=gold:
             for word in feature:
-                self.weights[p[0]][word] -= 1
-                self.accumilator[p[0]][word] -=self.count
+                self.weights[p][word] -= 1
+                self.accumilator[p][word] -=self.count
 
                 self.weights[gold][word] += 1
                 self.accumilator[gold][word] +=self.count

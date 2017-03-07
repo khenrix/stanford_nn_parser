@@ -30,38 +30,45 @@ def trees(fp):
     for tree in conllu(fp):
         pos = list()
         word = list()
+        label = list()
         Head = list()
         bigList = list()
 
         word.append('<ROOT>')
         pos.append('<ROOT>')
+        label.append('<ROOT>')
         Head.append(0)
         
-        if(len(tree) > 1):
+        if len(tree) > 1:
             for tokens in tree:
-                if(len(tokens)>0):
+                if len(tokens)>0:
                     word.append(tokens[1])
                     pos.append(tokens[3])
+                    label.append(tokens[7])
                     Head.append(int(tokens[6]))
     
             bigList.append(word)
             bigList.append(pos)
+            bigList.append(label)
             bigList.append(Head)
+
         else:
             bigList.append(["<End>"])
             bigList.append(["<End>"])
+            bigList.append(["<End>"])
             bigList.append(0)
+
         yield bigList
 
 
 
 def evaluate(train_file, test_file, par):
-    n_examples = None   # Set to None to train on all examples
+    n_examples = 1   # Set to None to train on all examples
 
     with open(train_file,encoding="utf-8") as fp:
-        for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
+        for i, (words, gold_tags, gold_arclabels, gold_tree) in enumerate(trees(fp)):
             if(words[0] == "<ROOT>"):
-                par.update(words, gold_tags, gold_tree)
+                par.update(words, gold_tags, gold_arclabels, gold_tree)
                 #print("\rUpdated with sentence #{}".format(i))
                 if n_examples and i >= n_examples:
                     print("Finished training")
@@ -74,7 +81,7 @@ def evaluate(train_file, test_file, par):
     acc_k = acc_n = 0
     uas_k = uas_n = 0
     with open(test_file,encoding="utf-8") as fp:
-        for i, (words, gold_tags, gold_tree) in enumerate(trees(fp)):
+        for i, (words, gold_tags, gold_arclabels, gold_tree) in enumerate(trees(fp)):
             if(words[0] == "<ROOT>"):
                 pred_tags, pred_tree = par.parse(words)
                 acc_k += sum(int(g == p) for g, p in zip(gold_tags, pred_tags)) - 1

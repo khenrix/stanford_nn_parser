@@ -26,10 +26,11 @@ class Parser():
             next move of the parser.
     """
 
-    def __init__(self, tagger):
+    def __init__(self, tagger, arc_tagger, model_path):
         self.tagger = tagger
+        self.arc_tagger = arc_tagger
         self.classifier = classifier.Classifier()
-        self.nn = nn.NN(self.tagger)
+        self.nn = nn.NN(model_path)  # TODO: Create arc tagger
 
 
     def parse(self, words):
@@ -121,7 +122,7 @@ class Parser():
         return i, stack, pred_tree
 
 
-    def update(self, words, gold_tags, gold_tree):
+    def update(self, words, gold_tags, gold_arclabels, gold_tree):
         # return super().update(words, gold_tags, gold_tree)
         """Updates the move classifier with a single training example.
         
@@ -138,9 +139,9 @@ class Parser():
         stack = []
         pdt = [0]*len(words)
 
-        tags = self.tagger.update(words,gold_tags)
-        #print( "tags: ", tags)
-        #print( "gold_tags: ", gold_tags)
+        tags = self.tagger.update(words, gold_tags)
+        arc_tags = self.arc_tagger.update(words, gold_arclabels)  # TODO: This is wrong, currently only looking at words , not pdt and words
+
         x=0
         while (True):
             g_move = self.gold_move(x,stack,pdt,gold_tree)
@@ -148,8 +149,9 @@ class Parser():
                 break
             feature = self.features(words,tags,x,stack,pdt)
             self.classifier.update(feature,g_move)
-            self.nn.predict(buffer,stack,pdt)
-            x,stack,pdt = self.move(x,stack,pdt,g_move)
+            self.nn.predict(buffer, stack, pdt, x, gold_tags, gold_arclabels)
+            x, stack, pdt = self.move(x,stack,pdt,g_move)
+
 
         return tags, pdt
 
@@ -221,28 +223,6 @@ class Parser():
         Returns:
             A feature vector for the specified configuration.
 
-        # empty stack
-        if(len(stack)==0):
-            print '1'
-            feature = [(0,words[i]),(1,tags[i]),(2, '<EMPTY>'), (3, '<EMPTY>'), (4, '<EMPTY>'), (5, '<EMPTY>')]
-        # 1 item on stack
-        elif(len(stack) == 1):
-            if(len(words) > i):
-                print '2'
-                feature = [(0,words[i]),(1,tags[i]),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, '<EMPTY>'), (5, '<EMPTY>')]
-            else:
-                print '3'
-                feature = [(0, '<EMPTY>'), (1, '<EMPTY>'), (2, words[stack[-1]]), (3, tags[stack[-1]]), (4, '<EMPTY>'), (5, '<EMPTY>')]
-        # empty buffer
-        elif(len(words) <=i or len(words)==0 and len(stack)>2):
-            print '4'
-            feature = [(0, '<EMPTY>'),(1, '<EMPTY>'),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, words[stack[-2]]), (5, tags[stack[-2]])]
-
-        else:
-            print '5'
-            feature = [(0,words[i]),(1,tags[i]),(2, words[stack[-1]]), (3, tags[stack[-1]]), (4, words[stack[-2]]), (5, tags[stack[-2]])]
-
-        return feature
         """
         features = list()
         if(i<len(words)):
@@ -279,3 +259,4 @@ class Parser():
         """Averages the weight vectors."""
         self.tagger.finalize()
         self.classifier.finalize()
+        self.arc_tagger.finalize()

@@ -16,7 +16,8 @@ class MySentences(object):
                         words = ['<ROOT>'] + [element[1] for element in buffer]
                         if len(words) > 1:
                             #print(words)
-                            yield ['<ROOT>'] + [element[1] for element in buffer]
+                            yield words
+
                         buffer = []
                     else:
                         columns = line.split()
@@ -31,6 +32,6 @@ class WSM:
 
     def create_model(self, path):
         sentences = MySentences(path)  # a memory-friendly iterator
-        self.model = word2vec.Word2Vec(sentences)
+        self.model = word2vec.Word2Vec(sentences, size=50)
         print(self.model['This'])
         self.model.save('models/wsm_en')

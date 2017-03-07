@@ -5,11 +5,11 @@ In the project we used a Averaged perceptron to classify which transition to use
 Instead of using the Multi-class perceptron as a classifier I now want to replace it with a neural network.  
 The parser will be based on the parser created by Danqi Chen and Christopher Manning at Stanford University, 2014.  
 
-[http://cs.stanford.edu/~danqi/papers/emnlp2014.pdf](A Fast and Accurate Dependency Parser Using Neural Networks)  
+[A Fast and Accurate Dependency Parser Using Neural Networks](http://cs.stanford.edu/~danqi/papers/emnlp2014.pdf)  
 
 **Further reading:**  
-* [http://nlp.stanford.edu/software/nndep.shtml](Neural Network Dependency Parser, Stanford)  
-* [https://web.stanford.edu/class/cs224n/lecture_notes/cs224n-2017-notes4.pdf](Natural Language Processing with Deep Learning)  
+* [Neural Network Dependency Parser, Stanford](http://nlp.stanford.edu/software/nndep.shtml)  
+* [Natural Language Processing with Deep Learning](https://web.stanford.edu/class/cs224n/lecture_notes/cs224n-2017-notes4.pdf)  
 
 **Motivation:**   
 Using stanfords parser they were able to get a UAS of 92%, LAS of 91% and a parsing speed of 1013 sentences/second.

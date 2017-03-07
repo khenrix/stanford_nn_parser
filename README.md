@@ -7,17 +7,17 @@ The parser will be based on the parser created by Danqi Chen and Christopher Man
 
 [http://cs.stanford.edu/~danqi/papers/emnlp2014.pdf](A Fast and Accurate Dependency Parser Using Neural Networks)  
 
-*Further reading:*  
+**Further reading:**  
 * [http://nlp.stanford.edu/software/nndep.shtml](Neural Network Dependency Parser, Stanford)  
 * [https://web.stanford.edu/class/cs224n/lecture_notes/cs224n-2017-notes4.pdf](Natural Language Processing with Deep Learning)  
 
-*Motivation:*   
+**Motivation:**   
 Using stanfords parser they were able to get a UAS of 92%, LAS of 91% and a parsing speed of 1013 sentences/second.
 I wanted to learn how to I could achieve similar results and in the process learn more about Natural language processing.
 
 ***
 
-*Structure*
+**Structure**  
 
 * Parser - Transition-based dependency parser
 * Tagger_POS - Part-of-speech (POS) tagger
@@ -27,22 +27,22 @@ I wanted to learn how to I could achieve similar results and in the process lear
 
 ***
  
-*Project structure before any modifcations were made*  
+**Project structure before any modifcations were made**  
 
 * Parser - Transition-based dependency parser
 * Tagger - Part-of-speech (POS) tagger
 * Classifier - Multi-class perceptron classifier
 * Corpus - English, Conllu format
 
-*Features*  
-**The structure of the features used in different parts**
+**Features**  
+*The structure of the features used in different parts*
 
 * Tagging features - 
 * Classifier features -
 * Parsing features - 
 
-*Accuracy*  
-**Trained on 4307 sentences**
+**Accuracy**  
+*Trained on 4307 sentences*
 
 * Unlabeled Attachment Score (UAS): 60.77%
 * Tagging Accuracy: 90.97 %

@@ -13,7 +13,7 @@ The parser will be based on the parser created by Danqi Chen and Christopher Man
 
 **Motivation:**   
 Using stanfords parser they were able to get a UAS of 92%, LAS of 91% and a parsing speed of 1013 sentences/second.
-I wanted to learn how to I could achieve similar results and in the process learn more about Natural language processing.
+I wanted to learn how I could achieve similar results and in the process learn more about Natural language processing.
 
 ***
 
@@ -35,14 +35,14 @@ I wanted to learn how to I could achieve similar results and in the process lear
 * Corpus - English, Conllu format
 
 **Features**  
-*The structure of the features used in different parts*
+The structure of the features used in different parts
 
 * Tagging features - 
 * Classifier features -
 * Parsing features - 
 
 **Accuracy**  
-*Trained on 4307 sentences*
+Trained on 4307 sentences
 
 * Unlabeled Attachment Score (UAS): 60.77%
 * Tagging Accuracy: 90.97 %

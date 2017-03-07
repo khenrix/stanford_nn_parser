@@ -1,6 +1,5 @@
+from gensim.models import word2vec
 import numpy as np
-import tagger
-
 import random as rnd
 
 # This class contains the Neural Network replacing the perceptron for the classifier.
@@ -14,13 +13,23 @@ class NN():
     tagger = None
 
     def __init__(self, tagger):
+        """
+
+        Args:
+            tagger: Tagger for Part of Speech (POS)
+            wsm: Word Space Model used for embedding text (word2Vec)
+
+        Returns:
+
+        """
         self.tagger = tagger
+        #self.wsm = word2vec.Word2Vec.load(fname)
 
     def hidden_function(self, w, t, l, bias=1, func='cube'):
         # Get feature representation of elements
-        word = self.embedd(w,'w')
-        tag = self.embedd(t,'t')
-        label = self.embedd(l,'l')
+        word = self.embedd(w, 'w')
+        tag = self.embedd(t, 't')
+        label = self.embedd(l, 'l')
 
         # Calcaulate hidden layer
         # TODO: Currently only handeling one element , need to handle the whole feature vector
@@ -38,37 +47,26 @@ class NN():
         elif func == 'identity':
             return data
 
-    def embedd(self, element, type):
+    def embedd(self, set):
         # Represent element as a d-dimensional vector
-        # TODO: Implement lab 5, words space model, word2vec
-        feature = 0
-
-        if type == 'w':
-            # Transform Word
-            feature = 0
-        elif type == 't':
-            # Transform Tag
-            feature = 0
-        elif type == 'l':
-            # Transform Arc-Label
-            feature = 0
+        feature = []
+        #for element in set:
+           #feature.append(self.wsm[element])
 
         return feature
 
     def create_sets(self, buffer, stack, pdt):
         Sw, St, Sl = [], [], []
         # TODO: Tag Arc Labels? How ? another tagger?
+        # TODO: This can be done so much fancier, ugly code
         # PDT: Predicted Dependency Tree
         # Get the top 3 words on stack, if less then 3 exist, add Null instead
         if len(stack) < 3:
-            Sw = stack
-            St = self.tagger.tag(Sw)
+            Sw = [buffer[elem] for elem in stack]
             while len(Sw) < 3:
                 Sw.append('NULL')
-                St.append('NULL')
         else:
-            Sw = stack[:-4:-1]  # "Pop" 3 elements from stack
-            St = self.tagger.tag(Sw)
+            Sw = [buffer[elem] for elem in stack[:-4:-1]]  # "Pop" 3 elements from stack
 
         # Get the top 3 words on the buffer
         if len(buffer) < 3:
@@ -76,38 +74,47 @@ class NN():
             St.extend(self.tagger.tag(Sw))
             while len(Sw) < 6:
                 Sw.append('NULL')
-                St.append('NULL')
         else:
             Sw.extend(buffer[0:2])
-            St.extend(self.tagger.tag(Sw[3:6]))
 
         # Get the first and second leftmost / rightmost children of the top two words on the stack
-        x = [buffer.index(s) for s in stack[-2:]]
+        x = stack[-2:]
         for elem in x:
-            leftmost = pdt.index(elem)
-            rightmost = len(pdt) - pdt[::-1].index(elem) - 1
+            if elem in pdt:
+                leftmost = pdt.index(elem)
+                rightmost = len(pdt) - pdt[::-1].index(elem) - 1
 
-            if leftmost == elem:
-                leftmost = 'NULL'
-            if rightmost == elem:
-                rightmost = 'NULL'
-
-            Sw.append(buffer[leftmost])
-            Sw.append(buffer[rightmost])
+                if leftmost == elem:
+                    Sw.append('NULL')
+                else:
+                    Sw.append(buffer[leftmost])
+                if rightmost == elem or rightmost == leftmost:
+                    Sw.append('NULL')
+                else:
+                    Sw.append(buffer[rightmost])
+            else:
+                Sw.append('NULL')
+                Sw.append('NULL')
 
         # Get the leftmost of leftmost / rightmost of right- most children of the top two words on the stack
         for elem in x:
-            right = len(pdt) - pdt[::-1].index(elem) - 1
-            leftmost = pdt.index(right)
+            if elem in pdt:
+                right = len(pdt) - pdt[::-1].index(elem) - 1
+                if right in pdt:
+                    leftmost = pdt.index(right)
 
-            if leftmost == right:
-                leftmost = 'NULL'
+                    if leftmost == right:
+                        Sw.append('NULL')
+                    else:
+                        Sw.append(buffer[leftmost])
+                else:
+                     Sw.append('NULL')
+            else:
+                Sw.append('NULL')
 
-            Sw.append(buffer[leftmost])
+        return self.embedd(Sw), St, Sl  # self.embedd(Sw, 'w'), self.embedd(St, 't'), self.embedd(Sl, 'l')
 
-        return self.embedd(Sw, 'w'), self.embedd(St, 't'), self.embedd(Sl, 'l')
-
-    def predict_move(self, buffer, stack, pdt):
+    def predict(self, buffer, stack, pdt):
         """
         1 Create sets for words, tags and arc-labels
             Word set, Sw: [s1,s2,s3,b1,b2,b3,l(s1),r(s1),l(s2),r(s2),l(r(s1)),l(r(s2))]
@@ -121,60 +128,13 @@ class NN():
         3 Calculate hidden layer with chosen activation function.
         4 Calculate activation of hidden layer
         """
-        # Currently isch pseudocode
 
         Sw, St, Sl = self.create_sets(buffer, stack, pdt)
-        h = self.hidden_function(Sw, St, Sl)
+        print(Sw)
+        #h = self.hidden_function(Sw, St, Sl)
         # TODO: Handle whole feature vector instead of one word.
-        #CALCULATE hidden_feature * weight_hidden 
-        return 0
-
-
-    """
-    Parsing section
-    Currently in the same file
-    TODO: Move it to parser file when done
-    """
-    def valid_moves(self, i, stack, pred_tree):
-
-        valid_moves = []
-        if i < len(pred_tree):
-            valid_moves.append(0)
-
-        if len(stack)>=2:
-            valid_moves.append(1)
-            valid_moves.append(2)
-
-        return valid_moves
-
-    def move(self, i, stack, pred_tree, move):
-        # SH - Shift
-        if move == 0:
-            stack.append(i)
-            i += 1
-        # left
-        elif move == 1:
-            ind = stack.pop(-2)
-            pred_tree[ind] = stack[-1]
-        # right
-        elif move == 2:
-            ind = stack.pop(-1)
-            pred_tree[ind] = stack[-1]
-
-        return i, stack, pred_tree
-
-    def predict(self, words):
-
-        buffer = words
-        stack = []
-        pdt = [0 for word in buffer]
-        i = 0
-        while True:
-            valid_moves = self.valid_moves(i,stack,pdt)
-            if not valid_moves:
-                break
-            predicted_move = self.predict_move(buffer, stack, pdt)
-            i, stack, pdt = self.move(i, stack, pdt, predicted_move)
+        #CALCULATE hidden_feature * weight_hidden
+        #return 0
 
     # def update(self, buffer, stack):
 

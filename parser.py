@@ -1,4 +1,5 @@
 import classifier
+import nn
 
 class Parser():
     """A transition-based dependency parser.
@@ -9,7 +10,7 @@ class Parser():
     predict a sequence of *moves* (transitions) that construct a dependency
     tree for the input sentence. Moves are encoded as integers as follows:
     """
-    moves = {0:"SH",1:"LA",2:"RA"}
+    moves = {0:"SH", 1:"LA", 2:"RA"}
     """
     At any given point in the predicted sequence, the state of the parser can
     be specified by: the index of the first word in the input sentence that
@@ -28,8 +29,7 @@ class Parser():
     def __init__(self, tagger):
         self.tagger = tagger
         self.classifier = classifier.Classifier()
-        """Initialises a new parser."""
-        # super().__init__()
+        self.nn = nn.NN(self.tagger)
 
 
     def parse(self, words):
@@ -148,6 +148,7 @@ class Parser():
                 break
             feature = self.features(words,tags,x,stack,pdt)
             self.classifier.update(feature,g_move)
+            self.nn.predict(buffer,stack,pdt)
             x,stack,pdt = self.move(x,stack,pdt,g_move)
 
         return tags, pdt
